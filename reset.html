@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset your FlightPath password</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 420px;
+         margin: 60px auto; padding: 0 20px; color: #0B1E33; }
+  h1 { font-size: 24px; letter-spacing: -0.5px; }
+  input { width: 100%; box-sizing: border-box; font-size: 16px; padding: 12px;
+          border: 1.5px solid #CBD8E6; border-radius: 10px; margin: 6px 0; }
+  button { width: 100%; font-size: 16px; font-weight: 700; padding: 13px;
+           background: #1D7DFF; color: #fff; border: 0; border-radius: 12px;
+           margin-top: 10px; cursor: pointer; }
+  .msg { font-weight: 600; margin-top: 12px; }
+  .ok { color: #0FA36B; } .err { color: #E03131; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<h1>Reset your FlightPath password</h1>
+<p id="intro">Choose a new password, then sign in on your phone.</p>
+<input id="pw1" type="password" placeholder="New password" autocomplete="new-password">
+<input id="pw2" type="password" placeholder="Repeat it" autocomplete="new-password">
+<button id="go">Set new password</button>
+<p id="msg" class="msg"></p>
+<script>
+  const client = supabase.createClient(
+    "https://meuljcpmrsqzmxzkgfak.supabase.co",
+    "sb_publishable_Uj_lvHernjuBHU48K_Gzqg_K_HDsOrH",
+  );
+  const msg = (t, cls) => { const m = document.getElementById("msg"); m.textContent = t; m.className = "msg " + cls; };
+  document.getElementById("go").onclick = async () => {
+    const a = document.getElementById("pw1").value;
+    const b = document.getElementById("pw2").value;
+    if (a.length < 6) return msg("At least 6 characters.", "err");
+    if (a !== b) return msg("Passwords don't match.", "err");
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) return msg("This link expired — request a new one from the app.", "err");
+    const { error } = await client.auth.updateUser({ password: a });
+    if (error) return msg(error.message, "err");
+    msg("Done — go sign in on your phone.", "ok");
+  };
+</script>
+</body>
+</html>
